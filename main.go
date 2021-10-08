@@ -11,7 +11,7 @@ import (
 type Block struct {
 	Index     int
 	Timestamp string
-	Data		Data
+	Data      Data
 	Hash      string
 	PreHash   string
 }
@@ -25,7 +25,11 @@ var Blockchain []Block
 
 func createHash(block Block) string {
 	//data to be sha256Hash for each block
-	record := strconv.Itoa(block.Index) + block.Timestamp + block.Data.Operation + fmt.Sprintf("%f", block.Data.Price) + block.PreHash
+	record := strconv.Itoa(block.Index) +
+			block.Timestamp +
+			block.Data.Operation +
+			fmt.Sprintf("%f", block.Data.Price) +
+			block.PreHash
 	//create a new hash
 	h := sha256.New()
 	h.Write([]byte(record))
@@ -33,7 +37,7 @@ func createHash(block Block) string {
 	return sha256Hash
 }
 
-func generateBlock(prevBlock Block, data Data) (Block, error)  {
+func generateBlock(prevBlock Block, data Data) (Block, error) {
 
 	var newBlock Block
 
@@ -49,4 +53,18 @@ func generateBlock(prevBlock Block, data Data) (Block, error)  {
 	return newBlock, nil
 }
 
+func isBlockValid(currBlock, prevBlock Block) bool {
 
+	if prevBlock.Index+1 != currBlock.Index ||
+		prevBlock.Hash != currBlock.PreHash ||
+		createHash(currBlock) != currBlock.Hash {
+		return false
+	}
+	return true
+}
+
+func longestChain(newBlocks []Block)  {
+	if len(newBlocks) > len(Blockchain) {
+		Blockchain = newBlocks
+	}
+}
