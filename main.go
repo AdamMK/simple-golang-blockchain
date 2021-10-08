@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"log"
@@ -34,6 +35,7 @@ func blockZero() Block {
 func main() {
 
 	err := godotenv.Load()
+	fmt.Println(err)
 	if err != nil {
 		log.Fatal(err)
 	}

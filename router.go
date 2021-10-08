@@ -16,16 +16,17 @@ func makeMuxRouter() http.Handler {
 }
 
 func run() error {
-	mux := makeMuxRouter()
-	httpAddr := os.Getenv("ADDR")
-	log.Println("Listening on ", os.Getenv("ADDR"))
+	muxRouter := makeMuxRouter()
+	httpAddr := os.Getenv("PORT")
+	log.Println("Listening on ", os.Getenv("PORT"))
 	s := &http.Server{
 		Addr:           ":" + httpAddr,
-		Handler:        mux,
+		Handler:        muxRouter,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
 
 	if err := s.ListenAndServe(); err != nil {
 		return err
