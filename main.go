@@ -1,10 +1,9 @@
-package goBlockchain
+package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
-	"strconv"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/joho/godotenv"
+	"log"
 	"time"
 )
 
@@ -23,48 +22,27 @@ type Data struct {
 
 var Blockchain []Block
 
-func createHash(block Block) string {
-	//data to be sha256Hash for each block
-	record := strconv.Itoa(block.Index) +
-			block.Timestamp +
-			block.Data.Operation +
-			fmt.Sprintf("%f", block.Data.Price) +
-			block.PreHash
-	//create a new hash
-	h := sha256.New()
-	h.Write([]byte(record))
-	sha256Hash := hex.EncodeToString(h.Sum(nil))
-	return sha256Hash
-}
 
-func generateBlock(prevBlock Block, data Data) (Block, error) {
-
-	var newBlock Block
+func blockZero() Block {
 
 	t := time.Now()
-
-	newBlock.Index = prevBlock.Index + 1
-	newBlock.Timestamp = t.String()
-	newBlock.Data.Operation = data.Operation
-	newBlock.Data.Price = data.Price
-	newBlock.PreHash = prevBlock.Hash
-	newBlock.Hash = createHash(newBlock)
-
-	return newBlock, nil
+	initData := Data{"", 0}
+	b := Block{0, t.String(), initData, "", ""}
+	return b
 }
 
-func isBlockValid(currBlock, prevBlock Block) bool {
+func main() {
 
-	if prevBlock.Index+1 != currBlock.Index ||
-		prevBlock.Hash != currBlock.PreHash ||
-		createHash(currBlock) != currBlock.Hash {
-		return false
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
 	}
-	return true
+
+	go func() {
+		firstBlock := blockZero()
+		spew.Dump(firstBlock)
+		Blockchain = append(Blockchain, firstBlock)
+	}()
+	log.Fatal(run())
 }
 
-func longestChain(newBlocks []Block)  {
-	if len(newBlocks) > len(Blockchain) {
-		Blockchain = newBlocks
-	}
-}
