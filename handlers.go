@@ -7,39 +7,45 @@ import (
 	"net/http"
 )
 
-
-func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
-	bytes, err := json.MarshalIndent(Blockchain, "", "  ")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	io.WriteString(w, string(bytes))
+func (s *Server) requests() {
+	s.HandleFunc("/", s.showBlockchain()).Methods("GET")
+	s.HandleFunc("/", s.addBlock()).Methods("POST")
 }
 
-func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
-	var d Data
-
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&d); err != nil {
-		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
-		return
+func (s *Server) showBlockchain() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		bytes, err := json.MarshalIndent(Blockchain, "", "  ")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		io.WriteString(w, string(bytes))
 	}
-	defer r.Body.Close()
+}
 
-	newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], d)
-	if err != nil {
-		respondWithJSON(w, r, http.StatusInternalServerError, d)
-		return
+func (s *Server) addBlock() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var d Data
+
+		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+			respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+			return
+		}
+		defer r.Body.Close()
+
+		newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], d)
+		if err != nil {
+			respondWithJSON(w, r, http.StatusInternalServerError, d)
+			return
+		}
+		if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
+			newBlockchain := append(Blockchain, newBlock)
+			longestChain(newBlockchain)
+			spew.Dump(Blockchain)
+		}
+
+		respondWithJSON(w, r, http.StatusCreated, newBlock)
 	}
-	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
-		newBlockchain := append(Blockchain, newBlock)
-		longestChain(newBlockchain)
-		spew.Dump(Blockchain)
-	}
-
-	respondWithJSON(w, r, http.StatusCreated, newBlock)
-
 }
 
 func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {

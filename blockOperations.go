@@ -30,10 +30,11 @@ func generateBlock(prevBlock Block, data Data) (Block, error) {
 
 	newBlock.Index = prevBlock.Index + 1
 	newBlock.Timestamp = t.String()
-	newBlock.Data.Operation = data.Operation
-	newBlock.Data.Price = data.Price
+	newBlock.Data = data
 	newBlock.PreHash = prevBlock.Hash
 	newBlock.Hash = createHash(newBlock)
+
+	//log.Println(newBlock.Data)
 
 	return newBlock, nil
 }

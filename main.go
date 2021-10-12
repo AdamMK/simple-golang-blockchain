@@ -5,6 +5,10 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -40,11 +44,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	serv := NewServer()
+	//muxRouter := makeMuxRouter()
+	httpAddr := ":" + os.Getenv("PORT")
+
+
+	firstBlock := blockZero()
+	spew.Dump(firstBlock)
+	Blockchain = append(Blockchain, firstBlock)
+
+	quitSig := make(chan os.Signal, 1)
+
+	signal.Notify(quitSig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
-		firstBlock := blockZero()
-		spew.Dump(firstBlock)
-		Blockchain = append(Blockchain, firstBlock)
+		if err := http.ListenAndServe(httpAddr, serv); err != nil {
+			log.Printf("Server error: %v\n", err)
+		}
 	}()
-	log.Fatal(run())
+	log.Println("Listening on port", os.Getenv("PORT"))
+
+	<-quitSig
+	log.Print("Server Stopped")
 }
 
