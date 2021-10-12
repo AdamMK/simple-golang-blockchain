@@ -28,14 +28,14 @@ func (s *Server) addBlock() http.HandlerFunc {
 		var d Data
 
 		if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-			respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+			respondWithJSON(w, http.StatusBadRequest, r.Body)
 			return
 		}
 		defer r.Body.Close()
 
 		newBlock, err := generateBlock(Blockchain[len(Blockchain)-1], d)
 		if err != nil {
-			respondWithJSON(w, r, http.StatusInternalServerError, d)
+			respondWithJSON(w, http.StatusInternalServerError, d)
 			return
 		}
 		if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
@@ -44,11 +44,11 @@ func (s *Server) addBlock() http.HandlerFunc {
 			spew.Dump(Blockchain)
 		}
 
-		respondWithJSON(w, r, http.StatusCreated, newBlock)
+		respondWithJSON(w, http.StatusCreated, newBlock)
 	}
 }
 
-func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

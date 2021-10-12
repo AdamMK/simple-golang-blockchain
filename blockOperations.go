@@ -25,7 +25,6 @@ func createHash(block Block) string {
 func generateBlock(prevBlock Block, data Data) (Block, error) {
 
 	var newBlock Block
-
 	t := time.Now()
 
 	newBlock.Index = prevBlock.Index + 1
@@ -33,8 +32,6 @@ func generateBlock(prevBlock Block, data Data) (Block, error) {
 	newBlock.Data = data
 	newBlock.PreHash = prevBlock.Hash
 	newBlock.Hash = createHash(newBlock)
-
-	//log.Println(newBlock.Data)
 
 	return newBlock, nil
 }

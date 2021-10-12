@@ -17,4 +17,3 @@ func NewServer() *Server {
 	s.requests()
 	return s
 }
-
